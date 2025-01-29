@@ -1,8 +1,23 @@
-FROM ubuntu:latest
+FROM node:18
 
-RUN apt-get update && apt-get install -y tmate
+Set working directory
+WORKDIR /usr/src/app
 
-ENV TMATE_SOCKET=/tmp/tmate.sock
-ENV TMATE_PUBLIC_HOSTNAME=${RAILWAY_STATIC_URL}
+Copy package files and install dependencies
+COPY package.json ./
+RUN npm install
 
+Install system dependencies
+RUN apt-get update && \
+    apt-get install -y ffmpeg imagemagick webp tmate && \
+    apt-get upgrade -y && \
+    rm -rf /var/lib/apt/lists/*
+
+Copy the rest of the application files
+COPY . .
+
+Expose the required port
+EXPOSE 2222
+
+Command to run the application
 CMD ["tmate", "-S", "/tmp/tmate.sock", "-p", "2222"]
